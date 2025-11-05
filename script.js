@@ -34,7 +34,84 @@ function filterDG(){
 
 function addDocGia(){
   const ma = dg_ma.value || 'DGNEW';
-  const ten = dg_ten.value || 'Chưa có tên';
+  const ten = dg_ten.value || 'Chưa có tên';/* ======== SỬA ĐỘC GIẢ ======== */
+function editDocGia(btn) {
+  const tr = btn.closest('tr');
+  const cells = tr.querySelectorAll('td');
+
+  // Lấy thông tin độc giả từ hàng
+  document.getElementById('dg_ma').value = cells[0].innerText;
+  document.getElementById('dg_ten').value = cells[1].innerText;
+  document.getElementById('dg_gt').value = cells[2].innerText;
+  document.getElementById('dg_ns').value = cells[3].innerText;
+  document.getElementById('dg_dc').value = cells[4].innerText;
+  document.getElementById('dg_sdt').value = cells[5].innerText;
+  document.getElementById('dg_cccd').value = cells[6].innerText;
+  document.getElementById('dg_lop').value = cells[7].innerText === "—" ? "" : cells[7].innerText;
+  document.getElementById('dg_cv').value = cells[8].innerText;
+
+  // Mở modal thêm độc giả (tận dụng form sẵn có)
+  openModal('modalDG');
+
+  // Đổi nút Lưu thành Cập nhật
+  const footer = document.querySelector('#modalDG .modal-footer');
+  footer.innerHTML = `
+    <button class="btn btn-light" onclick="closeModal('modalDG')">Hủy</button>
+    <button class="btn btn-primary" onclick="updateDocGia(this)">Cập nhật</button>
+  `;
+
+  // Lưu hàng hiện tại vào biến toàn cục
+  window.editingRow = tr;
+}
+
+function updateDocGia(btn) {
+  const tr = window.editingRow;
+  if (!tr) return alert("Không tìm thấy hàng để cập nhật.");
+
+  // Cập nhật giá trị vào hàng hiện tại
+  tr.children[0].innerText = dg_ma.value;
+  tr.children[1].innerText = dg_ten.value;
+  tr.children[2].innerText = dg_gt.value;
+  tr.children[3].innerText = dg_ns.value;
+  tr.children[4].innerText = dg_dc.value;
+  tr.children[5].innerText = dg_sdt.value;
+  tr.children[6].innerText = dg_cccd.value;
+  tr.children[7].innerText = dg_lop.value || "—";
+  tr.children[8].innerText = dg_cv.value;
+
+  closeModal('modalDG');
+  alert("Cập nhật thông tin độc giả thành công!");
+}
+
+/* ======== XÁC NHẬN XÓA ======== */
+function confirmDelete(btn) {
+  const modal = document.createElement('div');
+  modal.classList.add('confirm-modal');
+  modal.innerHTML = `
+    <div class="confirm-box">
+      <p>Bạn có chắc chắn muốn xóa độc giả này?</p>
+      <div class="confirm-buttons">
+        <button class="btn-cancel" onclick="closeConfirmModal(this)">Hủy</button>
+        <button class="btn-delete" onclick="deleteConfirmed(this)">Xóa</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.classList.add('show');
+  window.deletingRow = btn.closest('tr');
+}
+
+function closeConfirmModal(btn) {
+  btn.closest('.confirm-modal').remove();
+}
+
+function deleteConfirmed(btn) {
+  const modal = btn.closest('.confirm-modal');
+  if (window.deletingRow) {
+    window.deletingRow.remove();
+  }
+  modal.remove();
+}
   const gt = dg_gt.value;
   const ns = dg_ns.value;
   const dc = dg_dc.value;
@@ -159,125 +236,4 @@ function filterBC(){
   });
 }
 
-let rowBeingEdited = null;  // tham chiếu tới <tr> đang edit
-let rowBeingDeleted = null; // tham chiếu tới <tr> đang xóa
 
-/* mở modal chung (bạn đã có openModal/closeModal) */
-function openModal(id) {
-  const m = document.getElementById(id);
-  if (!m) return;
-  m.classList.add('show');
-  m.setAttribute('aria-hidden', 'false');
-}
-function closeModal(id) {
-  const m = document.getElementById(id);
-  if (!m) return;
-  m.classList.remove('show');
-  m.setAttribute('aria-hidden', 'true');
-}
-
-/* Hàm khi bấm Sửa trong ô thao tác */
-function onEdit(btn) {
-  const tr = btn.closest('tr');
-  if (!tr) return;
-  rowBeingEdited = tr;
-
-  // Lấy dữ liệu từ các ô (tùy cấu trúc cột bảng của bạn)
-  const tds = tr.querySelectorAll('td');
-  // Ví dụ thứ tự cột: Mã, Họ tên, Giới tính, Ngày sinh, Địa chỉ, SĐT, CCCD, Lớp, Chức vụ
-  document.getElementById('dg_ma').value = tds[0]?.textContent.trim() || '';
-  document.getElementById('dg_ten').value = tds[1]?.textContent.trim() || '';
-  document.getElementById('dg_gt').value = tds[2]?.textContent.trim() || 'Nam';
-  // Nếu ngày được lưu dạng yyyy-mm-dd thì gán trực tiếp, nếu khác cần parse
-  document.getElementById('dg_ns').value = tds[3]?.textContent.trim() || '';
-  // nếu có địa chỉ ở cột 4, sdt ở 5, cccd ở 6, lop 7, cv 8
-  // điều chỉnh chỉ số nếu bảng bạn khác
-  const possibleAddress = tds[4]?.textContent.trim() || '';
-  const possibleSdt = tds[5]?.textContent.trim() || '';
-  const possibleCccd = tds[6]?.textContent.trim() || '';
-  const possibleLop = tds[7]?.textContent.trim() || '';
-  const possibleCv = tds[8]?.textContent.trim() || 'Học sinh';
-
-  const addrField = document.getElementById('dg_dc');
-  if (addrField) addrField.value = possibleAddress;
-
-  const sdtField = document.getElementById('dg_sdt');
-  if (sdtField) sdtField.value = possibleSdt;
-
-  const cccdField = document.getElementById('dg_cccd');
-  if (cccdField) cccdField.value = possibleCccd;
-
-  const lopField = document.getElementById('dg_lop');
-  if (lopField) lopField.value = possibleLop;
-
-  const cvField = document.getElementById('dg_cv');
-  if (cvField) cvField.value = possibleCv;
-
-  // Thay đổi hành vi nút Lưu: lưu để cập nhật row đang edit
-  const modal = document.getElementById('modalDG');
-  if (modal) {
-    const saveBtn = modal.querySelector('.modal-footer .btn.btn-primary');
-    if (saveBtn) {
-      saveBtn.onclick = function() { saveEdit(); };
-    }
-  }
-
-  openModal('modalDG');
-}
-
-/* Lưu sau sửa (cập nhật hàng hiện tại) */
-function saveEdit() {
-  if (!rowBeingEdited) { addDocGia(); return; } // fallback: nếu không edit => thêm mới
-  const tds = rowBeingEdited.querySelectorAll('td');
-
-  // Gán lại theo cùng thứ tự như khi hiển thị
-  tds[0].textContent = document.getElementById('dg_ma').value.trim();
-  tds[1].textContent = document.getElementById('dg_ten').value.trim();
-  tds[2].textContent = document.getElementById('dg_gt').value;
-  tds[3].textContent = document.getElementById('dg_ns').value || '';
-  // địa chỉ
-  const addrField = document.getElementById('dg_dc');
-  if (tds[4] && addrField) tds[4].textContent = addrField.value.trim();
-  const sdtField = document.getElementById('dg_sdt');
-  if (tds[5] && sdtField) tds[5].textContent = sdtField.value.trim();
-  const cccdField = document.getElementById('dg_cccd');
-  if (tds[6] && cccdField) tds[6].textContent = cccdField.value.trim();
-  const lopField = document.getElementById('dg_lop');
-  if (tds[7] && lopField) tds[7].textContent = lopField.value.trim();
-  const cvField = document.getElementById('dg_cv');
-  if (tds[8] && cvField) tds[8].textContent = cvField.value;
-
-  // Reset và đóng modal
-  rowBeingEdited = null;
-  // reset nút lưu về hành vi add (nếu bạn muốn)
-  const modal = document.getElementById('modalDG');
-  if (modal) {
-    const saveBtn = modal.querySelector('.modal-footer .btn.btn-primary');
-    if (saveBtn) saveBtn.onclick = addDocGia;
-  }
-  // reset form fields (tùy cần)
-  closeModal('modalDG');
-}
-
-/* Khi bấm Xóa */
-function onDelete(btn) {
-  const tr = btn.closest('tr');
-  if (!tr) return;
-  rowBeingDeleted = tr;
-  openModal('confirmDelete');
-}
-
-/* Đóng confirm */
-function closeConfirm() {
-  rowBeingDeleted = null;
-  closeModal('confirmDelete');
-}
-
-/* Xác nhận xóa: thực hiện xóa rowBeingDeleted */
-function confirmDelete() {
-  if (rowBeingDeleted) {
-    rowBeingDeleted.remove();
-    rowBeingDeleted = null;
-  }
-  closeModal('confirmDelete');
-}

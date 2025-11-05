@@ -662,50 +662,85 @@ footer {
   }
 }
 
-/* Action buttons (Sửa / Xóa) kiểu ô tròn có chữ */
-.actions { display:flex; gap:8px; justify-content:center; align-items:center; }
+/* ===== Nút sửa & xóa có chữ ===== */
+.actions .btn {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.2s;
+}
 
-/* Dạng tròn nhưng chứa chữ, kích thước cố định */
-.action-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+.actions .btn-edit {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.actions .btn-edit:hover {
+  background: #bbf7d0;
+}
+
+.actions .btn-delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.actions .btn-delete:hover {
+  background: #fecaca;
+}
+
+/* Popup xác nhận xóa */
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.confirm-modal.show {
+  display: flex;
+}
+
+.confirm-box {
+  background: white;
+  border-radius: 12px;
+  padding: 24px 28px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  width: 300px;
+}
+
+.confirm-box p {
+  font-size: 15px;
+  color: #1e293b;
+  margin-bottom: 20px;
+}
+
+.confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-buttons button {
+  padding: 8px 16px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   font-weight: 600;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.confirm-buttons .btn-cancel {
+  background: #f3f4f6;
+  color: #0f172a;
+}
+
+.confirm-buttons .btn-delete {
+  background: #ef4444;
   color: white;
-  padding: 0;
-  box-shadow: 0 6px 12px rgba(2,6,23,0.08);
 }
-
-/* Sửa: nền xanh lá */
-.action-btn.edit {
-  background: linear-gradient(180deg,#86efac 0%,#34d399 100%); /* xanh lá nhạt -> xanh */
-  color: #064e3b;
-}
-
-/* Xóa: nền đỏ */
-.action-btn.del {
-  background: linear-gradient(180deg,#fecaca 0%,#f87171 100%); /* đỏ nhạt -> đỏ */
-  color: #7f1d1d;
-}
-
-/* Hover nhẹ */
-.action-btn.edit:hover { filter: brightness(0.98); transform: translateY(-1px); }
-.action-btn.del:hover { filter: brightness(0.98); transform: translateY(-1px); }
-
-/* Nếu muốn chữ "Sửa" và "Xóa" hiển thị hoàn toàn trên ô tròn nhỏ, có thể tăng width:
-   .action-btn { width: 48px; height: 40px; border-radius: 8px; } — nhưng hiện yêu cầu là tròn */
-
-/* Confirm modal override: nhỏ gọn, nút Xóa màu đỏ */
-#confirmDelete .modal-body { padding: 18px; }
-#confirmDelete .btn.btn-primary {
-  background: linear-gradient(180deg,#fecaca 0%,#f87171 100%);
-  color: #7f1d1d;
-  border-color: rgba(127,29,29,0.06);
-}
-#confirmDelete .btn.btn-light { background:#f3f4f6; color:#0f172a; border-color:#e6e7ea; }
