@@ -143,6 +143,24 @@
     </main>
   </div>
 
+  <!-- Trong mỗi hàng của tbody, ô Thao tác -->
+<td class="actions">
+  <button class="action-btn edit" onclick="onEdit(this)" title="Sửa">Sửa</button>
+  <button class="action-btn del" onclick="onDelete(this)" title="Xóa">Xóa</button>
+</td>
+
+<!-- Popup xác nhận xóa (thêm vào cuối <body>) -->
+<div id="confirmDelete" class="modal" aria-hidden="true">
+  <div class="modal-body" role="dialog" aria-modal="true" style="width: min(420px, 95%);">
+    <h3 class="modal-title">Xác nhận xóa</h3>
+    <p style="margin:12px 0 0 0; color: #334155;">Bạn có chắc chắn muốn xóa độc giả này?</p>
+    <div class="modal-footer" style="margin-top:20px;">
+      <button class="btn btn-light" type="button" onclick="closeConfirm()">Hủy</button>
+      <button class="btn btn-primary" type="button" onclick="confirmDelete()">Xóa</button>
+    </div>
+  </div>
+</div>
+
   <script src="script.js"></script>
 </body>
 </html>

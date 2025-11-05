@@ -380,6 +380,7 @@ tbody tr {
 .badge.blue { background: #dbeafe; color: #1d4ed8; }
 .badge.green { background: #dcfce7; color: #15803d; }
 .badge.red { background: #fee2e2; color: #b91c1c; }
+
 /* ========== TRANG CHỦ ========== */
 body {
   margin: 0;
@@ -473,12 +474,14 @@ body {
   margin-top: 20px;
 }
 
-.card {
-  width: 220px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  background: #fff;
-  transition: transform 0.3s ease;
+.main .card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-top: 25px;
+  width: 100%; /* đảm bảo chiếm không gian chính */
+  box-sizing: border-box;
 }
 
 .card:hover {
@@ -512,3 +515,197 @@ footer {
   font-size: 18px;
 }
 
+/* Modal footer: layout và khoảng cách */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+/* Kiểu chung cho các nút trong modal */
+.modal-footer .btn {
+  min-width: 120px;           /* cùng chiều ngang */
+  padding: 10px 14px;         /* chiều cao đồng đều */
+  border-radius: 10px;        /* bo góc chữ nhật */
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+/* Nút Hủy: nền xám nhạt, chữ tối */
+.modal-footer .btn.btn-light {
+  background: #f3f4f6;        /* xám nhạt */
+  color: #0f172a;
+  border-color: #e6e7ea;
+}
+
+/* Nút Lưu: nền xanh dương nhạt, chữ tương phản */
+.modal-footer .btn.btn-primary {
+  background: linear-gradient(180deg, #cfe7ff 0%, #b6d9ff 100%); /* xanh nhạt */
+  color: #063970;             /* chữ xanh đậm cho tương phản */
+  border-color: rgba(6,57,112,0.08);
+}
+
+/* Hover nhẹ giữ nguyên kích thước */
+.modal-footer .btn.btn-light:hover {
+  background: #eceff2;
+}
+.modal-footer .btn.btn-primary:hover {
+  filter: brightness(0.98);
+}
+
+/* Nếu có icon trong nút: giữ khoảng cách */
+.modal-footer .btn i {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+/* Responsive: trên màn nhỏ, hai nút full-width và xếp dọc */
+@media (max-width: 480px) {
+  .modal-footer {
+    flex-direction: row;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .modal-footer .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* RESET CHO NÚT TRONG MODAL: ép mọi thứ đồng bộ */
+.modal .modal-footer,
+.modal .modal-footer * {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+  font-family: inherit !important;
+}
+
+/* Container footer: flex row, căn giữa theo trục dọc */
+.modal .modal-footer {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 0 !important;
+}
+
+/* Kiểu chung bắt buộc cho các nút trong modal footer */
+.modal .modal-footer .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 44px !important;         /* chiều cao cố định */
+  min-width: 120px !important;     /* chiều ngang tối thiểu */
+  padding: 0 16px !important;      /* padding ngang */
+  line-height: 1 !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  border: 1px solid transparent !important;
+}
+
+/* Hủy: xám nhạt nền, chữ tối */
+.modal .modal-footer .btn.btn-light {
+  background: #f3f4f6 !important;
+  color: #0f172a !important;
+  border-color: #e6e7ea !important;
+}
+
+/* Lưu: xanh dương nhạt nền, chữ tương phản */
+.modal .modal-footer .btn.btn-primary {
+  background: linear-gradient(180deg,#cfe7ff 0%,#b6d9ff 100%) !important;
+  color: #063970 !important;
+  border-color: rgba(6,57,112,0.08) !important;
+}
+
+/* Icon trong nút: khống chế kích thước và khoảng cách */
+.modal .modal-footer .btn i {
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  margin-right: 8px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+/* Trường hợp nút có border-box khác: buộc padding nội bộ */
+.modal .modal-footer .btn > * {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Responsive: trên màn nhỏ, hai nút full-width, vẫn thẳng hàng (xếp dọc) */
+@media (max-width: 480px) {
+  .modal .modal-footer {
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .modal .modal-footer .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+  }
+}
+
+/* Action buttons (Sửa / Xóa) kiểu ô tròn có chữ */
+.actions { display:flex; gap:8px; justify-content:center; align-items:center; }
+
+/* Dạng tròn nhưng chứa chữ, kích thước cố định */
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 0;
+  box-shadow: 0 6px 12px rgba(2,6,23,0.08);
+}
+
+/* Sửa: nền xanh lá */
+.action-btn.edit {
+  background: linear-gradient(180deg,#86efac 0%,#34d399 100%); /* xanh lá nhạt -> xanh */
+  color: #064e3b;
+}
+
+/* Xóa: nền đỏ */
+.action-btn.del {
+  background: linear-gradient(180deg,#fecaca 0%,#f87171 100%); /* đỏ nhạt -> đỏ */
+  color: #7f1d1d;
+}
+
+/* Hover nhẹ */
+.action-btn.edit:hover { filter: brightness(0.98); transform: translateY(-1px); }
+.action-btn.del:hover { filter: brightness(0.98); transform: translateY(-1px); }
+
+/* Nếu muốn chữ "Sửa" và "Xóa" hiển thị hoàn toàn trên ô tròn nhỏ, có thể tăng width:
+   .action-btn { width: 48px; height: 40px; border-radius: 8px; } — nhưng hiện yêu cầu là tròn */
+
+/* Confirm modal override: nhỏ gọn, nút Xóa màu đỏ */
+#confirmDelete .modal-body { padding: 18px; }
+#confirmDelete .btn.btn-primary {
+  background: linear-gradient(180deg,#fecaca 0%,#f87171 100%);
+  color: #7f1d1d;
+  border-color: rgba(127,29,29,0.06);
+}
+#confirmDelete .btn.btn-light { background:#f3f4f6; color:#0f172a; border-color:#e6e7ea; }
