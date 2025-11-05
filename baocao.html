@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Báo cáo & thống kê - Thư viện THCS Mai Dịch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://kit.fontawesome.com/3f55b9dd5f.js" crossorigin="anonymous"></script>
+  <style>
+    /* ------------------- GIAO DIỆN CHUNG ------------------- */
+    body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; margin: 0; color: #111827; }
+    .layout { display: flex; min-height: 100vh; }
+
+    aside.sidebar {
+      width: 230px; background: #e3f0ff; padding: 30px 18px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      border-right: 1px solid #d9e2ef;
+    }
+    .brand h1 { font-size: 17px; margin: 0; color: #1e3a8a; }
+    .brand small { font-size: 12px; color: #475569; }
+    .nav a { display: block; padding: 10px 0; color: #0f172a; text-decoration: none; font-size: 15px; }
+    .nav a.active { color: #2563eb; font-weight: 600; }
+
+    .logout {
+      text-decoration: none; display: block; background: #fee2e2; color: #b91c1c;
+      padding: 8px 12px; border-radius: 8px; text-align: center; margin-top: 30px;
+    }
+
+    .main { flex: 1; padding: 25px 40px; }
+    h2.page-title { font-size: 20px; margin: 0 0 5px; }
+    p.breadcrumb { color: #64748b; font-size: 13px; }
+
+    /* ------------------- BỘ LỌC ------------------- */
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin: 18px 0;
+    }
+    input[type="date"] {
+      padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;
+    }
+    button.filter-btn {
+      background: #2563eb; color: white; border: none; border-radius: 8px;
+      padding: 7px 16px; cursor: pointer;
+    }
+    button.export-btn {
+      background: #16a34a; color: white; border: none; border-radius: 8px;
+      padding: 7px 16px; cursor: pointer;
+    }
+
+    /* ------------------- TABS ------------------- */
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab-btn {
+      background: #e2e8f0; border: none; padding: 8px 18px;
+      border-radius: 999px; cursor: pointer; font-weight: 500; color: #334155;
+    }
+    .tab-btn.active { background: #fff; color: #1d4ed8; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* ------------------- BẢNG ------------------- */
+    .card {
+      background: white; border-radius: 12px; padding: 15px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 20px;
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;
+    }
+    thead { background: #eff6ff; }
+    th, td {
+      padding: 10px 12px; border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+    .badge { border-radius: 999px; font-size: 12px; padding: 3px 8px; }
+    .blue { background: #dbeafe; color: #1d4ed8; }
+    .green { background: #dcfce7; color: #15803d; }
+    .red { background: #fee2e2; color: #b91c1c; }
+
+    /* ------------------- PANELS ------------------- */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <small>THƯ VIỆN</small>
+        <h1>Trường THCS Mai Dịch</h1>
+      </div>
+      <nav class="nav">
+        <a href="docgia.html"><i class="fa-solid fa-users"></i> Độc giả</a>
+        <a href="sach.html"><i class="fa-solid fa-book"></i> Sách</a>
+        <a href="phieumuon.html"><i class="fa-solid fa-file-lines"></i> Phiếu mượn</a>
+        <a href="baocao.html" class="active"><i class="fa-solid fa-chart-line"></i> Báo cáo</a>
+      </nav>
+      <a href="index.html" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+    </aside>
+
+    <!-- Nội dung -->
+    <main class="main">
+      <h2 class="page-title">Báo cáo & thống kê</h2>
+      <p class="breadcrumb">Hệ thống > Báo cáo thống kê</p>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="muon">Sách đang được mượn</button>
+        <button class="tab-btn" data-tab="docgia">Độc giả mượn nhiều</button>
+        <button class="tab-btn" data-tab="thang">Tháng được mượn nhiều nhất</button>
+      </div>
+
+      <!-- Bộ lọc -->
+      <div class="filter-bar">
+        <label>Từ ngày:</label>
+        <input type="date">
+        <label>Đến ngày:</label>
+        <input type="date">
+        <button class="filter-btn"><i class="fa-solid fa-filter"></i> Lọc</button>
+        <button class="export-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+      </div>
+
+      <!-- Báo cáo 1 -->
+      <div id="muon" class="panel active">
+        <div class="card">
+          <p><strong>Khoảng thời gian:</strong> 01/11/2025 - 15/11/2025</p>
+          <p><strong>Tổng sách đang mượn:</strong> 27</p>
+          <p><strong>Số phiếu mượn:</strong> 9</p>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Độc giả</th>
+                <th>Tên sách</th>
+                <th>Hạn trả</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PM001</td><td>Nguyễn Minh An (9A1)</td><td>Văn học 6 - Tập 1</td><td>2025-11-15</td><td><span class="badge blue">Đang mượn</span></td>
+              </tr>
+              <tr>
+                <td>PM002</td><td>Trần Thu Hà (8B2)</td><td>Bài tập Toán 7</td><td>2025-11-10</td><td><span class="badge green">Đã trả</span></td>
+              </tr>
+              <tr>
+                <td>PM003</td><td>Đỗ Thị Lan (GV)</td><td>Khám phá khoa học</td><td>2025-11-05</td><td><span class="badge red">Quá hạn</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Báo cáo 2 -->
+      <div id="docgia" class="panel">
+        <div class="card">
+          <p><strong>Kỳ thống kê:</strong> 01/10/2025 - 31/10/2025</p>
+          <p><strong>Độc giả mượn nhiều nhất:</strong> 8 lượt/kỳ</p>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th><th>Mã độc giả</th><th>Họ tên</th><th>Lớp / Chức vụ</th><th>Số lượt mượn</th><th>Tỷ lệ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>DG001</td><td>Nguyễn Minh An</td><td>9A1 - Học sinh</td><td>8</td><td>28.6%</td></tr>
+              <tr><td>2</td><td>DG002</td><td>Trần Thu Hà</td><td>8B2 - Học sinh</td><td>6</td><td>21.4%</td></tr>
+              <tr><td>3</td><td>DGGV01</td><td>Đỗ Thị Lan</td><td>Giáo viên</td><td>5</td><td>17.8%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Báo cáo 3 -->
+      <div id="thang" class="panel">
+        <div class="card">
+          <p><strong>Tháng mượn nhiều nhất:</strong> 10/2025</p>
+          <p><strong>Tổng lượt mượn:</strong> 124</p>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr><th>Tháng</th><th>Tổng lượt mượn</th><th>Số độc giả</th><th>Đầu sách mượn nhiều</th><th>Tỷ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>10/2025</td><td>124</td><td>56</td><td>Văn học 6 - Tập 1</td><td>18%</td></tr>
+              <tr><td>09/2025</td><td>110</td><td>49</td><td>Toán 6 - Tập 2</td><td>16%</td></tr>
+              <tr><td>08/2025</td><td>92</td><td>40</td><td>Khám phá khoa học</td><td>13%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Chuyển tab
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.panel');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        panels.forEach(p => {
+          p.classList.toggle('active', p.id === tab.dataset.tab);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+

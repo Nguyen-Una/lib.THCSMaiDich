@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Đăng nhập - Hệ thống QL Thư viện THCS Mai Dịch</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://kit.fontawesome.com/3f55b9dd5f.js" crossorigin="anonymous"></script>
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135679.png" alt="" style="width:58px;margin-bottom:6px;">
+    <h1 class="login-title">HỆ THỐNG QUẢN LÝ THƯ VIỆN</h1>
+    <p class="login-sub">Trường THCS Mai Dịch – dành cho quản trị viên & thủ thư</p>
+
+    <form onsubmit="return fakeLogin(event)">
+      <div class="login-group">
+        <i class="fa-solid fa-user"></i>
+        <input class="login-input" type="text" id="user" placeholder="Tên đăng nhập (vd: thuthu01)" required />
+      </div>
+      <div class="login-group">
+        <i class="fa-solid fa-lock"></i>
+        <input class="login-input" type="password" id="pass" placeholder="Mật khẩu" required />
+      </div>
+      <button class="login-btn" type="submit">Đăng nhập</button>
+    </form>
+
+    <a href="forgot.html" class="forgot-link">Quên mật khẩu?</a>
+
+    <p style="margin-top:12px;font-size:12px;color:#94a3b8;">Demo: nhập gì cũng được để vào hệ thống.</p>
+  </div>
+
+  <script>
+    function fakeLogin(e){
+      e.preventDefault();
+      // luôn chuyển sang trang độc giả
+      window.location.href = "docgia.html";
+    }
+  </script>
+</body>
+</html>
+
