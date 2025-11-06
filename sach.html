@@ -5,6 +5,7 @@
   <title>Quản lý sách - Thư viện THCS Mai Dịch</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://kit.fontawesome.com/3f55b9dd5f.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="layout">
@@ -109,7 +110,10 @@
         <div class="modal-body">
           <h3 class="modal-title">Thêm sách</h3>
           <div class="form-grid">
-            <div class="form-group"><label>Mã sách</label><input id="s_ma" type="text" placeholder="VD: S010"></div>
+            <div style="display:none;">
+              <input id="s_ma" type="text" readonly />
+            </div>
+          <!--  <div class="form-group"><label>Mã sách</label><input id="s_ma" type="text" placeholder="VD: S010"></div>-->
             <div class="form-group"><label>Tên sách</label><input id="s_ten" type="text"></div>
             <div class="form-group"><label>Thể loại</label><input id="s_tl" type="text" placeholder="VD: Toán, Văn học..."></div>
             <div class="form-group"><label>Năm XB</label><input id="s_nam" type="number" min="1990" max="2030"></div>

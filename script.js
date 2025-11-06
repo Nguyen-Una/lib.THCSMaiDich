@@ -1,13 +1,57 @@
+// script.js (HOÀN CHỈNH - THAY THẾ TOÀN BỘ FILE HIỆN TẠI)
+
 // mở / đóng modal
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
-// xoá dòng
-function deleteRow(btn){
-  if(confirm("Bạn có chắc muốn xóa bản ghi này?")) btn.closest('tr').remove();
+// ---- Generic delete confirm (dùng cho tất cả) ----
+function confirmDeleteGeneric(btn, message, onConfirm) {
+  const modal = document.createElement('div');
+  modal.classList.add('confirm-modal');
+  modal.innerHTML = `
+    <div class="confirm-box">
+      <p>${message}</p>
+      <div class="confirm-buttons">
+        <button class="btn-cancel" onclick="closeConfirmModal(this)">Hủy</button>
+        <button class="btn-delete" id="__confirmBtn">Xóa</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.classList.add('show');
+  const confirmBtn = document.getElementById('__confirmBtn');
+  confirmBtn.addEventListener('click', () => {
+    if (onConfirm) onConfirm();
+    modal.remove();
+  });
+  window.currentDeleting = btn.closest('tr');
 }
 
-// demo sửa
+function closeConfirmModal(btn) {
+  btn.closest('.confirm-modal').remove();
+}
+
+// wrapper cụ thể để giữ tương thích với tên cũ
+function confirmDeleteDocGia(btn) {
+  confirmDeleteGeneric(btn, "Bạn có chắc chắn muốn xóa độc giả này?", () => {
+    if (window.currentDeleting) window.currentDeleting.remove();
+    showToast("🗑️ Đã xóa độc giả!");
+  });
+}
+function confirmDeletePM(btn) {
+  confirmDeleteGeneric(btn, "Bạn có chắc chắn muốn xóa phiếu mượn này?", () => {
+    if (window.currentDeleting) window.currentDeleting.remove();
+    showToast("🗑️ Đã xóa phiếu mượn!");
+  });
+}
+function confirmDeleteSach(btn) {
+  confirmDeleteGeneric(btn, "Bạn có chắc chắn muốn xóa sách này?", () => {
+    if (window.currentDeleting) window.currentDeleting.remove();
+    showToast("🗑️ Đã xóa sách!");
+  });
+}
+
+// demo sửa generic (nếu cần)
 function editRow(btn, type){
   alert("Demo cập nhật " + (type || "bản ghi") + ". Khi nộp bài bạn mô tả: nhấn Sửa sẽ mở form cập nhật.");
 }
@@ -20,92 +64,82 @@ function searchDG(){
   });
 }
 
-function filterDG(){
-  const lop = document.getElementById('filterLop')?.value?.toLowerCase() || "";
-  const cv = document.getElementById('filterCV')?.value?.toLowerCase() || "";
-  document.querySelectorAll('#tableDG tbody tr').forEach(r=>{
-    const lopVal = r.children[7].innerText.toLowerCase();
-    const cvVal = r.children[8].innerText.toLowerCase();
-    const okLop = !lop || lopVal === lop;
-    const okCV = !cv || cvVal === cv;
-    r.style.display = okLop && okCV ? '' : 'none';
-  });
-}
+function addDocGia() {
+  const table = document.getElementById("tableDG").getElementsByTagName("tbody")[0];
 
-function addDocGia(){
-  const ma = dg_ma.value || 'DGNEW';
-  const ten = dg_ten.value || 'Chưa có tên';
-  const gt = dg_gt.value;
-  const ns = dg_ns.value;
-  const dc = dg_dc.value;
-  const sdt = dg_sdt.value;
-  const cccd = dg_cccd.value;
-  const lop = dg_lop.value || '—';
-  const cv = dg_cv.value;
+  // Lấy mã độc giả cuối cùng
+  const rows = table.getElementsByTagName("tr");
+  let lastCode = "DG000";
+  if (rows.length > 0) {
+    lastCode = rows[rows.length - 1].cells[0].innerText.trim();
+  }
 
-  const tbody = document.querySelector('#tableDG tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${ma}</td>
+  // Sinh mã mới
+  const newNumber = parseInt(lastCode.replace(/[^0-9]/g, "")) + 1;
+  const newCode = "DG" + newNumber.toString().padStart(3, "0");
+
+  // Lấy dữ liệu từ form
+  const ten = document.getElementById("dg_ten").value.trim();
+  const gt = document.getElementById("dg_gt").value;
+  const ns = document.getElementById("dg_ns").value;
+  const diachi = document.getElementById("dg_dc").value.trim();
+  const sdt = document.getElementById("dg_sdt").value.trim();
+  const cccd = document.getElementById("dg_cccd").value.trim();
+  const lop = document.getElementById("dg_lop").value.trim();
+  const cv = document.getElementById("dg_cv").value;
+
+  // Kiểm tra nhập thiếu (chỉ bắt những trường bắt buộc)
+  if (!ten || !ns || !sdt) {
+    Swal.fire({
+      icon: "warning",
+      title: "Thiếu thông tin",
+      text: "Vui lòng nhập Họ tên, Ngày sinh và SĐT!",
+      confirmButtonColor: "#3085d6"
+    });
+    return;
+  }
+
+  // Thêm hàng mới vào bảng
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td>${newCode}</td>
     <td>${ten}</td>
     <td>${gt}</td>
     <td>${ns}</td>
-    <td>${dc}</td>
+    <td>${diachi}</td>
     <td>${sdt}</td>
     <td>${cccd}</td>
-    <td>${lop}</td>
+    <td>${lop || "—"}</td>
     <td>${cv}</td>
     <td class="actions">
-      <button class="btn-icon btn-edit" onclick="editRow(this,'dg')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-icon btn-delete" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
+      <button class="btn btn-edit" onclick="editDocGia(this)">Sửa</button>
+      <button class="btn btn-delete" onclick="confirmDeleteDocGia(this)">Xóa</button>
     </td>
   `;
-  tbody.appendChild(tr);
+
+  // reset form + đóng modal
+  document.getElementById("dg_ten").value = "";
+  document.getElementById("dg_gt").value = "Nam";
+  document.getElementById("dg_ns").value = "";
+  document.getElementById("dg_dc").value = "";
+  document.getElementById("dg_sdt").value = "";
+  document.getElementById("dg_cccd").value = "";
+  document.getElementById("dg_lop").value = "";
+  document.getElementById("dg_cv").value = "Học sinh";
+
+// Cập nhật localStorage sau khi thêm độc giả mới
+const ds = JSON.parse(localStorage.getItem("dsDocGia") || "[]");
+ds.push({ ma: newCode, ten: ten });
+localStorage.setItem("dsDocGia", JSON.stringify(ds));
+
   closeModal('modalDG');
-}
-
-/* ====== SÁCH ====== */
-function searchSach(){
-  const key = document.getElementById('searchSach').value.toLowerCase();
-  document.querySelectorAll('#tableSach tbody tr').forEach(r=>{
-    r.style.display = r.innerText.toLowerCase().includes(key) ? '' : 'none';
+  Swal.fire({
+    icon: "success",
+    title: "Đã thêm thành công!",
+    text: `${ten} đã được thêm vào danh sách.`,
+    timer: 1500,
+    showConfirmButton: false
   });
-}
-
-function filterSach(){
-  const tl = document.getElementById('filterTL').value.toLowerCase();
-  document.querySelectorAll('#tableSach tbody tr').forEach(r=>{
-    const val = r.children[2].innerText.toLowerCase();
-    r.style.display = !tl || val === tl ? '' : 'none';
-  });
-}
-
-function addSach(){
-  const ma = s_ma.value || 'SNEW';
-  const ten = s_ten.value || 'Chưa đặt tên';
-  const tl = s_tl.value || 'Khác';
-  const nam = s_nam.value || '';
-  const nxb = s_nxb.value || '';
-  const tg = s_tg.value || '';
-  const sl = s_sl.value || '0';
-
-  const tbody = document.querySelector('#tableSach tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${ma}</td>
-    <td>${ten}</td>
-    <td>${tl}</td>
-    <td>${nam}</td>
-    <td>${nxb}</td>
-    <td>${tg}</td>
-    <td>${sl}</td>
-    <td class="actions">
-      <button class="btn-icon btn-edit" onclick="editRow(this,'sach')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-icon btn-delete" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
-    </td>
-  `;
-  tbody.appendChild(tr);
-  closeModal('modalSach');
 }
 
 /* ====== PHIẾU MƯỢN ====== */
@@ -124,38 +158,164 @@ function filterPM(){
   });
 }
 
-function addPM(){
-  const ma = pm_ma.value || 'PMNEW';
-  const dg = pm_dg.value || 'Không rõ';
-  const nm = pm_nm.value || '';
-  const ht = pm_ht.value || '';
-  const tt = pm_tt.value;
-  const gc = pm_gc.value || '';
+function addPM() {
+  // CHÚ Ý: table id phải là "tablePM"
+  const table = document.getElementById("tablePM").getElementsByTagName("tbody")[0];
 
-  const tbody = document.querySelector('#tablePM tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${ma}</td>
-    <td>${dg}</td>
-    <td>${nm}</td>
-    <td>${ht}</td>
-    <td><span class="badge">${tt}</span></td>
-    <td>${gc}</td>
+  // Lấy mã phiếu mượn cuối
+  const rows = table.getElementsByTagName("tr");
+  let lastCode = "PM000";
+  if (rows.length > 0) {
+    lastCode = rows[rows.length - 1].cells[0].innerText.trim();
+  }
+
+  // Sinh mã mới
+  const newNumber = parseInt(lastCode.replace(/[^0-9]/g, "")) + 1;
+  const newCode = "PM" + newNumber.toString().padStart(3, "0");
+
+  // Lấy dữ liệu từ form (IDs phải khớp)
+  const madg = document.getElementById("pm_dg").value.trim();
+  const ngaymuon = document.getElementById("pm_nm").value;
+  const hantra = document.getElementById("pm_ht").value;
+  const tinhtrang = document.getElementById("pm_tt").value;
+
+  if (!madg || !ngaymuon || !hantra) {
+    Swal.fire({
+      icon: "warning",
+      title: "Thiếu thông tin",
+      text: "Vui lòng nhập đầy đủ Mã độc giả, Ngày mượn và Hạn trả!",
+      confirmButtonColor: "#3085d6"
+    });
+    return;
+  }
+
+  // Thêm hàng mới vào bảng (tạo badge màu)
+  let badgeStyle = "";
+  if (tinhtrang === "Đang mượn") badgeStyle = "background:rgba(37,99,235,.15);color:#1d4ed8;";
+  else if (tinhtrang === "Đã trả") badgeStyle = "background:rgba(22,163,74,.14);color:#166534;";
+  else if (tinhtrang === "Quá hạn") badgeStyle = "background:rgba(248,113,113,.1);color:#b91c1c;";
+
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td>${newCode}</td>
+    <td>${layTenTheoMa(madg)}</td>
+    <td>${ngaymuon}</td>
+    <td>${hantra}</td>
+    <td><span class="badge" style="${badgeStyle}">${tinhtrang}</span></td>
     <td class="actions">
-      <button class="btn-icon btn-edit" onclick="editRow(this,'pm')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-icon btn-delete" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
+      <button class="btn btn-edit" onclick="editPhieuMuon(this)">Sửa</button>
+      <button class="btn btn-delete" onclick="confirmDeletePM(this)">Xóa</button>
     </td>
   `;
-  tbody.appendChild(tr);
-  closeModal('modalPM');
+
+  // ======= Lấy tên độc giả từ mã (chỉ hiển thị tên) =======
+function layTenTheoMa(maDG) {
+  const data = localStorage.getItem("dsDocGia");
+  if (!data) return maDG; // nếu chưa lưu thì trả lại mã
+  const dsDocGia = JSON.parse(data);
+  const item = dsDocGia.find(d => d.ma === maDG);
+  return item ? item.ten : maDG;
 }
 
-/* ====== BÁO CÁO ====== */
-function filterBC(){
-  const type = document.getElementById('bc_loai').value;
-  document.querySelectorAll('#tableBC tbody tr').forEach(r=>{
-    const status = r.dataset.status;
-    r.style.display = (type === 'all' || status === type) ? '' : 'none';
+  // Reset form + đóng modal
+  document.getElementById("pm_dg").value = "";
+  document.getElementById("pm_nm").value = "";
+  document.getElementById("pm_ht").value = "";
+  document.getElementById("pm_tt").value = "Đang mượn";
+
+  closeModal('modalPM');
+
+  // reset footer modal (đưa nút Lưu về trạng thái ban đầu)
+  const pmFooter = document.querySelector('#modalPM .modal-footer');
+  if (pmFooter) {
+    pmFooter.innerHTML = `
+      <button class="btn btn-light" onclick="closeModal('modalPM')">Hủy</button>
+      <button class="btn btn-primary" onclick="addPM()">Lưu</button>
+    `;
+  }
+
+  Swal.fire({
+    icon: "success",
+    title: "Thành công!",
+    text: "Đã thêm phiếu mượn mới!",
+    timer: 1400,
+    showConfirmButton: false
+  });
+}
+
+/* ====== SÁCH ====== */
+function addSach() {
+  const table = document.getElementById("tableSach").getElementsByTagName("tbody")[0];
+
+  // Lấy hàng cuối cùng để biết mã sách lớn nhất hiện có
+  const rows = table.getElementsByTagName("tr");
+  let lastCode = "S000";
+  if (rows.length > 0) {
+    lastCode = rows[rows.length - 1].cells[0].innerText.trim();
+  }
+
+  // Tách phần số và tăng lên 1
+  const newNumber = parseInt(lastCode.replace(/[^0-9]/g, "")) + 1;
+  const newCode = "S" + newNumber.toString().padStart(3, "0");
+
+  // Lấy dữ liệu từ form
+  const ten = document.getElementById("s_ten").value.trim();
+  const tl = document.getElementById("s_tl").value.trim();
+  const nam = document.getElementById("s_nam").value.trim();
+  const nxb = document.getElementById("s_nxb").value.trim();
+  const tg = document.getElementById("s_tg").value.trim();
+  const sl = document.getElementById("s_sl").value.trim();
+
+  if (!ten || !tl || !nam || !nxb || !tg || !sl) {
+    Swal.fire({
+      icon: "warning",
+      title: "Thiếu thông tin",
+      text: "Vui lòng nhập đầy đủ thông tin!",
+      confirmButtonColor: "#3085d6"
+    });
+    return;
+  }
+
+  // Thêm hàng mới vào bảng
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td>${newCode}</td>
+    <td>${ten}</td>
+    <td>${tl}</td>
+    <td>${nam}</td>
+    <td>${nxb}</td>
+    <td>${tg}</td>
+    <td>${sl}</td>
+    <td class="actions">
+      <button class="btn btn-edit" onclick="editSach(this)">Sửa</button>
+      <button class="btn btn-delete" onclick="confirmDeleteSach(this)">Xóa</button>
+    </td>
+  `;
+
+  // reset form
+  document.getElementById("s_ten").value = "";
+  document.getElementById("s_tl").value = "";
+  document.getElementById("s_nam").value = "";
+  document.getElementById("s_nxb").value = "";
+  document.getElementById("s_tg").value = "";
+  document.getElementById("s_sl").value = "";
+
+  closeModal('modalSach');
+
+  // reset footer
+  const sachFooter = document.querySelector('#modalSach .modal-footer');
+  if (sachFooter) {
+    sachFooter.innerHTML = `
+      <button class="btn btn-light" onclick="closeModal('modalSach')">Hủy</button>
+      <button class="btn btn-primary" onclick="addSach()">Lưu</button>
+    `;
+  }
+
+  Swal.fire({
+    icon: "success",
+    title: "Đã thêm sách mới!",
+    timer: 1300,
+    showConfirmButton: false
   });
 }
 
@@ -164,7 +324,7 @@ function editDocGia(btn) {
   const tr = btn.closest('tr');
   const cells = tr.querySelectorAll('td');
 
-  // Gán dữ liệu vào form
+  // Gán dữ liệu vào form (đảm bảo input dg_ma tồn tại)
   document.getElementById('dg_ma').value = cells[0].innerText;
   document.getElementById('dg_ten').value = cells[1].innerText;
   document.getElementById('dg_gt').value = cells[2].innerText;
@@ -193,81 +353,30 @@ function updateDocGia() {
   const tr = window.editingRow;
   if (!tr) return;
 
-  tr.children[0].innerText = dg_ma.value;
-  tr.children[1].innerText = dg_ten.value;
-  tr.children[2].innerText = dg_gt.value;
-  tr.children[3].innerText = dg_ns.value;
-  tr.children[4].innerText = dg_dc.value;
-  tr.children[5].innerText = dg_sdt.value;
-  tr.children[6].innerText = dg_cccd.value;
-  tr.children[7].innerText = dg_lop.value || "—";
-  tr.children[8].innerText = dg_cv.value;
+  tr.children[0].innerText = document.getElementById('dg_ma').value;
+  tr.children[1].innerText = document.getElementById('dg_ten').value;
+  tr.children[2].innerText = document.getElementById('dg_gt').value;
+  tr.children[3].innerText = document.getElementById('dg_ns').value;
+  tr.children[4].innerText = document.getElementById('dg_dc').value;
+  tr.children[5].innerText = document.getElementById('dg_sdt').value;
+  tr.children[6].innerText = document.getElementById('dg_cccd').value;
+  tr.children[7].innerText = document.getElementById('dg_lop').value || "—";
+  tr.children[8].innerText = document.getElementById('dg_cv').value;
 
   closeModal('modalDG');
   showToast("✅ Cập nhật thông tin thành công!");
-}
 
-/* ======== XÁC NHẬN XÓA ======== */
-function confirmDelete(btn) {
-  const modal = document.createElement('div');
-  modal.classList.add('confirm-modal');
-  modal.innerHTML = `
-    <div class="confirm-box">
-      <p>Bạn có chắc chắn muốn xóa độc giả này?</p>
-      <div class="confirm-buttons">
-        <button class="btn-cancel" onclick="closeConfirmModal(this)">Hủy</button>
-        <button class="btn-delete" onclick="deleteConfirmed(this)">Xóa</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.classList.add('show');
-  window.deletingRow = btn.closest('tr');
-}
-
-function closeConfirmModal(btn) {
-  btn.closest('.confirm-modal').remove();
-}
-
-function deleteConfirmed(btn) {
-  if (window.deletingRow) {
-    window.deletingRow.remove();
-    showToast("🗑️ Đã xóa độc giả!");
+  // reset footer về nút Lưu
+  const dgFooter = document.querySelector('#modalDG .modal-footer');
+  if (dgFooter) {
+    dgFooter.innerHTML = `
+      <button class="btn btn-light" onclick="closeModal('modalDG')">Hủy</button>
+      <button class="btn btn-primary" onclick="addDocGia()">Lưu</button>
+    `;
   }
-  btn.closest('.confirm-modal').remove();
 }
 
-/* ======= Thông báo nhỏ góc phải ======= */
-function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.textContent = msg;
-  toast.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #2563eb;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    z-index: 3000;
-    animation: fadeInOut 2.8s forwards;
-  `;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2800);
-}
-
-const style = document.createElement('style');
-style.textContent = `
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(20px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(20px); }
-}`;
-document.head.appendChild(style);
-
-/* ======== SỬA SÁCH ======== */
+/* ======== Sửa sách ======== */
 function editSach(btn) {
   const tr = btn.closest('tr');
   const cells = tr.querySelectorAll('td');
@@ -298,45 +407,28 @@ function updateSach() {
   const tr = window.editingSach;
   if (!tr) return;
 
-  tr.children[0].innerText = s_ma.value;
-  tr.children[1].innerText = s_ten.value;
-  tr.children[2].innerText = s_tl.value;
-  tr.children[3].innerText = s_nam.value;
-  tr.children[4].innerText = s_nxb.value;
-  tr.children[5].innerText = s_tg.value;
-  tr.children[6].innerText = s_sl.value;
+  tr.children[0].innerText = document.getElementById('s_ma').value;
+  tr.children[1].innerText = document.getElementById('s_ten').value;
+  tr.children[2].innerText = document.getElementById('s_tl').value;
+  tr.children[3].innerText = document.getElementById('s_nam').value;
+  tr.children[4].innerText = document.getElementById('s_nxb').value;
+  tr.children[5].innerText = document.getElementById('s_tg').value;
+  tr.children[6].innerText = document.getElementById('s_sl').value;
 
   closeModal('modalSach');
   showToast("✅ Cập nhật thông tin sách thành công!");
-}
 
-/* ======== XÁC NHẬN XÓA SÁCH ======== */
-function confirmDeleteSach(btn) {
-  const modal = document.createElement('div');
-  modal.classList.add('confirm-modal');
-  modal.innerHTML = `
-    <div class="confirm-box">
-      <p>Bạn có chắc chắn muốn xóa sách này?</p>
-      <div class="confirm-buttons">
-        <button class="btn-cancel" onclick="closeConfirmModal(this)">Hủy</button>
-        <button class="btn-delete" onclick="deleteSachConfirmed(this)">Xóa</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.classList.add('show');
-  window.deletingSach = btn.closest('tr');
-}
-
-function deleteSachConfirmed(btn) {
-  if (window.deletingSach) {
-    window.deletingSach.remove();
-    showToast("🗑️ Đã xóa sách!");
+  // reset footer
+  const sachFooter = document.querySelector('#modalSach .modal-footer');
+  if (sachFooter) {
+    sachFooter.innerHTML = `
+      <button class="btn btn-light" onclick="closeModal('modalSach')">Hủy</button>
+      <button class="btn btn-primary" onclick="addSach()">Lưu</button>
+    `;
   }
-  btn.closest('.confirm-modal').remove();
 }
 
-/* ======== SỬA PHIẾU MƯỢN ======== */
+/* ======== Sửa phiếu mượn ======== */
 function editPhieuMuon(btn) {
   const tr = btn.closest('tr');
   const cells = tr.querySelectorAll('td');
@@ -350,7 +442,6 @@ function editPhieuMuon(btn) {
   // Trạng thái là phần tử <span> trong ô
   const status = cells[4].innerText.trim();
   document.getElementById('pm_tt').value = status;
-  document.getElementById('pm_gc').value = cells[5].innerText;
 
   // Mở form (modal)
   openModal('modalPM');
@@ -370,42 +461,52 @@ function updatePhieuMuon() {
   const tr = window.editingPM;
   if (!tr) return;
 
-  // Cập nhật dữ liệu mới vào hàng
-  tr.children[0].innerText = pm_ma.value;
-  tr.children[1].innerText = pm_dg.value;
-  tr.children[2].innerText = pm_nm.value;
-  tr.children[3].innerText = pm_ht.value;
-  tr.children[4].innerHTML = `<span class="badge">${pm_tt.value}</span>`;
-  tr.children[5].innerText = pm_gc.value;
+  tr.children[0].innerText = document.getElementById('pm_ma').value;
+  tr.children[1].innerText = document.getElementById('pm_dg').value;
+  tr.children[2].innerText = document.getElementById('pm_nm').value;
+  tr.children[3].innerText = document.getElementById('pm_ht').value;
+  tr.children[4].innerHTML = `<span class="badge">${document.getElementById('pm_tt').value}</span>`;
 
   closeModal('modalPM');
   showToast("✅ Cập nhật phiếu mượn thành công!");
-}
 
-/* ======== XÁC NHẬN XÓA PHIẾU MƯỢN ======== */
-function confirmDeletePM(btn) {
-  const modal = document.createElement('div');
-  modal.classList.add('confirm-modal');
-  modal.innerHTML = `
-    <div class="confirm-box">
-      <p>Bạn có chắc chắn muốn xóa phiếu mượn này?</p>
-      <div class="confirm-buttons">
-        <button class="btn-cancel" onclick="closeConfirmModal(this)">Hủy</button>
-        <button class="btn-delete" onclick="deletePMConfirmed(this)">Xóa</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.classList.add('show');
-  window.deletingPM = btn.closest('tr');
-}
-
-function deletePMConfirmed(btn) {
-  if (window.deletingPM) {
-    window.deletingPM.remove();
-    showToast("🗑️ Đã xóa phiếu mượn!");
+  // reset footer
+  const pmFooter2 = document.querySelector('#modalPM .modal-footer');
+  if (pmFooter2) {
+    pmFooter2.innerHTML = `
+      <button class="btn btn-light" onclick="closeModal('modalPM')">Hủy</button>
+      <button class="btn btn-primary" onclick="addPM()">Lưu</button>
+    `;
   }
-  btn.closest('.confirm-modal').remove();
 }
 
+/* ======== Thông báo nhỏ góc phải ======== */
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2563eb;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 3000;
+    animation: fadeInOut 2.8s forwards;
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(20px); }
+}`;
+document.head.appendChild(style);
 

@@ -5,6 +5,7 @@
   <title>Quản lý độc giả - Thư viện THCS Mai Dịch</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://kit.fontawesome.com/3f55b9dd5f.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="layout">
@@ -35,18 +36,6 @@
               <input id="searchDG" type="text" class="input" placeholder="Tìm tên / mã / SĐT">
             </div>
             <button class="btn btn-light" onclick="searchDG()">Tìm</button>
-            <select id="filterLop" onchange="filterDG()">
-              <option value="">Tất cả lớp</option>
-              <option value="6A1">6A1</option>
-              <option value="7A2">7A2</option>
-              <option value="8B2">8B2</option>
-              <option value="9A1">9A1</option>
-            </select>
-            <select id="filterCV" onchange="filterDG()">
-              <option value="">Tất cả chức vụ</option>
-              <option value="Học sinh">Học sinh</option>
-              <option value="Giáo viên">Giáo viên</option>
-            </select>
             <button class="btn btn-primary" onclick="openModal('modalDG')"><i class="fa-solid fa-plus"></i> Thêm độc giả</button>
           </div>
         </div>
@@ -100,7 +89,7 @@
               </tr>
               <!-- độc giả giáo viên -->
               <tr>
-                <td>DGGV01</td>
+                <td>DG003</td>
                 <td>Đỗ Thị Lan</td>
                 <td>Nữ</td>
                 <td>1989-02-08</td>
@@ -124,7 +113,10 @@
         <div class="modal-body">
           <h3 class="modal-title">Thêm độc giả</h3>
           <div class="form-grid">
-            <div class="form-group"><label>Mã độc giả</label><input id="dg_ma" type="text" placeholder="VD: DG010"></div>
+            <div style="display:none;">
+             <input id="dg_ma" type="text" readonly />
+            </div>
+          <!--<div class="form-group"><label>Mã độc giả</label><input id="dg_ma" type="text" placeholder="VD: DG010"></div>-->
             <div class="form-group"><label>Họ tên</label><input id="dg_ten" type="text"></div>
             <div class="form-group"><label>Giới tính</label><select id="dg_gt"><option>Nam</option><option>Nữ</option></select></div>
             <div class="form-group"><label>Ngày sinh</label><input id="dg_ns" type="date"></div>
@@ -142,7 +134,23 @@
       </div>
     </main>
   </div>
-
+<script>
+  // Mỗi khi trang độc giả tải lại, lưu danh sách độc giả hiện có vào localStorage
+  window.addEventListener("load", () => {
+    const rows = document.querySelectorAll("#tableDG tbody tr");
+    const dsDocGia = [];
+    rows.forEach(r => {
+      const cells = r.querySelectorAll("td");
+      if (cells.length >= 2) {
+        dsDocGia.push({
+          ma: cells[0].innerText.trim(),
+          ten: cells[1].innerText.trim()
+        });
+      }
+    });
+    localStorage.setItem("dsDocGia", JSON.stringify(dsDocGia));
+  });
+</script>
   <script src="script.js"></script>
 </body>
 </html>
